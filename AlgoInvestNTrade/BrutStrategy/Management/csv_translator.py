@@ -32,8 +32,11 @@ class CsvTranslator:
                 action = line.replace("\n", "")
                 action = action.split(",")
                 action[0] = str(action[0])
-                action[1] = int(action[1])
-                action[2] = int(action[2])
+                try:
+                    action[1] = int(action[1])
+                    action[2] = int(action[2])
+                except ValueError:
+                    pass
                 self.translated_list.append(action)
             # Delete 'name, price, profit' raw.
             self.translated_list.pop(0)
