@@ -1,6 +1,7 @@
 # Std Libs:
 import math
-from itertools import permutations
+from itertools import permutations, combinations
+from sys import stdout
 # Local Libs:
 from csv_translator import CsvTranslator
 
@@ -9,10 +10,10 @@ class BrutForce:
     """
 
     """
-    def __init__(self, sequence):
+    def __init__(self, sequence, actions):
         """ """
         self.sequence = sequence
-        self.actions = CsvTranslator("actions").convert_to_list()
+        self.actions = actions
 
         self.budget = 500
         self.benefits = 0
@@ -48,16 +49,23 @@ class BrutForce:
 
 def main():
     init_seq = [var for var in range(20)]
-    brut_sequences = []
-    best_sequence = BrutForce(init_seq)
+    actions = CsvTranslator("actions").convert_to_list()
+    best_sequence = BrutForce(init_seq, actions)
     print(f"best : {best_sequence.benefits}")
-    for sequence in permutations(init_seq):
-        brut_force = BrutForce(sequence)
-        if brut_force > best_sequence:
-            best_sequence = brut_force
-            print(f"New best : {best_sequence.benefits}")
-            print(f"\tTransactions : {best_sequence.transactions}")
-    
+    counter = 0
+    for r in range(20):
+        for sequence in combinations(init_seq, r):
+            counter+=1
+            stdout.write(f"\r{round((counter*100)/(math.pow(2, 20)))}%")
+            stdout.flush()
+            brut_force = BrutForce(sequence, actions)
+            if brut_force > best_sequence:
+                best_sequence = brut_force
+                print(f"New best : {best_sequence.benefits}")
+                print(f"\tTransactions : {best_sequence.transactions}")
+    return best_sequence
 
 if __name__ == '__main__':
-    main()
+    a = main()
+    print(f"Very Best : {a.benefits}")
+    print(f"\tTransactions : {a.transactions}")
