@@ -63,15 +63,10 @@ class Optimized:
         print(array)
         return array
 
-    def defined_way(self, map, action):
-        """ """
-        pass
-
     def opt_transactions(self) -> list:
         """ """
         trans_map = self.mapping()
         actions = self.actions
-        start_point = trans_map[-1][-1]
         col_point = trans_map.shape[1] - 1
         list_transactions = []
         for i in range(len(actions) - 1, 0, -1):
@@ -81,7 +76,21 @@ class Optimized:
         print(list_transactions)
         return list_transactions
 
+    def decisions(self) -> None:
+        """ """
+        cost = 0
+        profit = 0
+        actions = self.opt_transactions()
+        for action in actions:
+            cost += action[1]
+            profit += action[1] * action[2]/100
+        print("Emeric bought :\n")
+        for action in actions:
+            print(action[0])
+        print(f"\nTotal cost : {cost}€")
+        print(f"Total return : {round(profit, 2)}€")
+
             
             
 
-a = Optimized("actions").opt_transactions()
+a = Optimized("actions").decisions()
