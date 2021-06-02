@@ -10,7 +10,7 @@ class BrutForce:
     """
 
     """
-    def __init__(self, sequence, actions):
+    def __init__(self, sequence: list, actions: list) -> None:
         """ """
         self.sequence = sequence
         self.actions = actions
@@ -21,13 +21,13 @@ class BrutForce:
 
         self.buy()
 
-    def __lt__(self, obj):
+    def __lt__(self, obj) -> bool:
         """ """
         if self.benefits < obj.benefits:
             return True
         return False
 
-    def buy(self):
+    def buy(self) -> None:
         """ """
         for index in self.sequence:
             if self.budget > 0:
@@ -47,25 +47,23 @@ class BrutForce:
                 break
 
 
-def main():
-    init_seq = [var for var in range(20)]
+def main() -> BrutForce:
+    """ """
     actions = CsvTranslator("actions").convert_to_list()
+    num_actions = len(actions)
+    init_seq = [var for var in range(num_actions)]
     best_sequence = BrutForce(init_seq, actions)
     print(f"best : {best_sequence.benefits}")
-    counter = 0
-    for r in range(20):
+    for r in range(num_actions):
         for sequence in combinations(init_seq, r):
-            counter+=1
-            stdout.write(f"\r{round((counter*100)/(math.pow(2, 20)))}%")
-            stdout.flush()
             brut_force = BrutForce(sequence, actions)
             if brut_force > best_sequence:
                 best_sequence = brut_force
-                print(f"New best : {best_sequence.benefits}")
+                print(f"New best : {round(best_sequence.benefits, 2)}€")
                 print(f"\tTransactions : {best_sequence.transactions}")
     return best_sequence
 
 if __name__ == '__main__':
     a = main()
-    print(f"Very Best : {a.benefits}")
+    print(f"Very Best : {round(a.benefits, 2)}€")
     print(f"\tTransactions : {a.transactions}")
