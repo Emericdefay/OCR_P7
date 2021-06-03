@@ -9,12 +9,17 @@ from csv_translator import CsvTranslator
 
 class Optimized:
     """
-
+    Able to choose best benefits actions.
+    Given actions & budget.
     """
     def __init__(self,
                  actions_file_name: str,
                  budget: Optional[int] = 500) -> None:
-        """ """
+        """
+        Args:
+            - actions_file_name (str) : The .csv action file name.
+            - budget (int) : The budget, optional.
+        """
         # Convert file
         self.file = CsvTranslator(actions_file_name)
         self.actions = self.file.convert_to_list()
@@ -30,7 +35,11 @@ class Optimized:
         self.transactions = []
 
     def count_decimals(self) -> int:
-        """ """
+        """
+        Count the number of decimals after point.
+        Optimizing the precision of Algorithm but multiply by ten 
+        the number of calculations per decimal.
+        """
         list_count_decimals = [0]
         for action in self.actions:
             # Get number of decimals after point for price values
@@ -40,7 +49,9 @@ class Optimized:
         return max_decimals
 
     def create_zeros_array(self) -> np.ndarray:
-        """ """
+        """
+        Create a null matrice with dimensions : (number action; self.budget)
+        """
         size = self.budget + 1
         list_zeros = [[0. for _ in range(1, size)]
                       for _ in range(len(self.actions))]
@@ -48,7 +59,9 @@ class Optimized:
         return array
 
     def mapping(self) -> np.ndarray:
-        """ """
+        """
+        
+        """
         array = self.create_zeros_array()
         actions = self.actions
         row = 0
@@ -98,7 +111,16 @@ class Optimized:
         return list_transactions
 
     def decisions(self) -> dict:
-        """ """
+        """
+        With the list of transactions that optimized the investment, calculate:
+            - benefits
+            - costs
+        Returns:
+            dict :
+                - "actions" (list): List of transactions
+                - "cost" (int)    : Total cost
+                - "benefit" (int) : Total benefit
+        """
         cost = 0
         benefits = 0
         actions = self.opt_transactions()
@@ -118,9 +140,13 @@ class Optimized:
 
 
 def timer(func):
-    """ """
+    """
+    A little decorator function that give that execution time of a function.
+    """
     def decorator(*args, **kwargs):
-        """ """
+        """
+        Print the difference of time between start and end of function's exec'.
+        """
         time_a = time.time()
         result = func(*args, **kwargs)
         time_b = time.time()
@@ -131,12 +157,24 @@ def timer(func):
 
 @timer
 def take_decision(**kwargs):
-    """ """
+    """Apply optimized strategy with setup arguments"""
     return Optimized(**kwargs).decisions()
 
 
 def main():
-    """ """
+    """
+    This function is called to apply optimized strategy with inputs.
+
+    Inputs :
+        - budget (int) : The amount of money for investments
+        - file (str)   : Name of the .csv file that contain three columns
+                         'action_name', 'price' & 'profit'
+    Returns:
+        - dict (dict)  : A dictionnary containing several informations:
+                            - actions took
+                            - The total cost according to the budget
+                            - The return of the investment
+    """
     budget = int(input("Give budget : "))
     file = input("Give name of csv file containing actions : ")
     dict_args = {
