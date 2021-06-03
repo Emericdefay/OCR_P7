@@ -22,12 +22,12 @@ class CsvTranslator:
         """
         path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                             os.pardir))
-        folder = 'Product'
+        folder = 'product'
         self.translated_list = []
         with open(
                 f'{path}\\'
-                    f'{folder}\\'
-                        f'{self.csv_file_name}.csv', 'r') as csv_file:
+                f'{folder}\\'
+                f'{self.csv_file_name}.csv', 'r') as csv_file:
             for line in csv_file:
                 action = line.replace("\n", "")
                 action = action.split(",")
