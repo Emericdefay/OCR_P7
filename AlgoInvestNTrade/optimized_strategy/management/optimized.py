@@ -52,15 +52,69 @@ class Optimized:
         """
         Create a null matrice with dimensions : (number action; self.budget)
         """
-        size = self.budget + 1
-        list_zeros = [[0. for _ in range(1, size)]
+        list_zeros = [[0. for _ in range(self.budget)]
                       for _ in range(len(self.actions))]
         array = np.array(list_zeros)
         return array
 
     def mapping(self) -> np.ndarray:
         """
-        
+        First step of the resolution.
+
+        Algorithm:
+            1. Initialization
+                a) Set a matrice of zeros with correct dims (dim1, dim2)
+                b) Get the actions
+                c) Define a counter "row" at 0
+            2. For: a number (A) going from 0 to dim1*dim2 
+                a) Memorize A in another variable (B)
+                b) Do A modulo dim2 ( A will be <= dim2 ) : A = money invest
+                c) Set the cost value (C) for current 'row'
+
+                If : A >= C
+                (Meaning : Money invest >= Cost of action)
+                    - Calculate the benefit
+                    If : 'row' > 0:
+                        - Get the value (D) at the row upside
+                        - Get the cost of action
+                        If : D > benefits + benefits of action upside without
+                                        the cost of the current action added
+                            - current benefit = D
+                            ! Meaning that this current action is not worth it
+                        Else:
+                            - current benefit = benef + benefits action upside
+                                                without cost of current action.
+                            ! Meaning that this current action is worth it
+                            
+                    Else:
+                        - Set the first row with benefits of first action
+                Else:
+                    If 'row' > 0:
+                        - Take the value upside
+                    else:
+                        - Make it to 0
+                If col == 0 and var != 0:
+                    row += 1
+
+        Time complexity:
+            variables :
+                - budget_precision : 500.00€     ->  50000 operations
+                - number_of_actions: 50 actions  ->  50 operations
+            Number of operation :
+                Number of operation = budget_precision * number_of_actions
+
+                Since max(budget_precision) IN THIS CASE should be 50000:
+                    It's constant
+                Then:
+                    Number of operation = Constant * number_of_actions
+            Big-O :
+                O(number_of_actions)
+            
+        Space complexity:
+            Array:
+                array = [[0. for _ in range(budget)] for _ in range(actions)]
+            Big-O :
+                O(number_of_actions)
         """
         array = self.create_zeros_array()
         actions = self.actions
@@ -72,33 +126,40 @@ class Optimized:
             if col >= cost:
                 benefit = ((cost * float(actions[row][2]))
                            / ((10**self.num_decimals)))
-
                 if row > 0:
-                    try:
-                        last_value = array[row - 1][col]
-                        # key = int(cost * 10**self.num_decimals)
-                        key = int(cost)
-                        if last_value > (benefit + array[row - 1][col-key]):
-                            array[row][col] = last_value
-                        else:
-                            array[row][col] = benefit + array[row - 1][col-key]
-                    except IndexError:
-                        array[row][col] = benefit
-                        raise
+                    last_value = array[row - 1][col]
+                    key = int(cost)
+                    if last_value > (benefit + array[row - 1][col-key]):
+                        array[row][col] = last_value
+                    else:
+                        array[row][col] = benefit + array[row - 1][col-key]
                 else:
                     array[row][col] = benefit
             else:
                 if row > 0:
                     array[row][col] = array[row - 1][col]
                 else:
-                    array[row][col] = 0
+                    array[row][col] = 0.
             if col == 0 and var != 0:
                 row += 1
         # print(array)
         return array
 
     def opt_transactions(self) -> list:
-        """ """
+        """
+        Second step of the resolution.
+
+        To understand this process, check the docstring of the previous step.
+        ( Section Algorithm and especially at '! Meaning' lines )
+
+        Algorithm:
+            1.
+
+        Time Complexity:
+
+        Space Complexity:
+
+        """
         trans_map = self.mapping()
         actions = self.actions
         col_point = trans_map.shape[1] - 1
@@ -121,8 +182,8 @@ class Optimized:
                 - "cost" (int)    : Total cost
                 - "benefit" (int) : Total benefit
         """
-        cost = 0
-        benefits = 0
+        cost = 0.
+        benefits = 0.
         actions = self.opt_transactions()
         for action in actions:
             price = action[1]/(10**self.num_decimals)
@@ -133,8 +194,10 @@ class Optimized:
             self.transactions.append([action[0]])
         dict_decision = {
             "actions": self.transactions,
-            "cost": round(cost, 2),
-            "return": round(benefits, 2),
+            # "cost": round(cost, 2),
+            # "return": round(benefits, 2),
+            "cost": cost,
+            "return": benefits,
         }
         return dict_decision
 
