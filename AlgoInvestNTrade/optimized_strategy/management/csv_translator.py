@@ -43,9 +43,8 @@ class CsvTranslator:
                         action[1] = int(action[1])
                         action[2] = float(action[2])
                     if float(action[1]) > 0 and float(action[2]) > 0:
+                        # Delete 'name, price, profit' raw.
                         self.translated_list.append(action)
                 except ValueError:
                     pass
-            # Delete 'name, price, profit' raw.
-            self.translated_list.pop(0)
         return self.translated_list

@@ -14,7 +14,10 @@ class Optimized:
     """
     def __init__(self,
                  actions_file_name: str,
-                 budget: Optional[int] = 500) -> None:
+                 budget: Optional[int] = 500,
+                 minimum_cost: Optional[float] = 0.,
+                 static_fees: Optional[float] = 0.,
+                 pourc_fees: Optional[float] = 0.) -> None:
         """
         Args:
             - actions_file_name (str) : The .csv action file name.
@@ -23,6 +26,7 @@ class Optimized:
         # Convert file
         self.file = CsvTranslator(actions_file_name)
         self.actions = self.file.convert_to_list()
+        print(self.actions)
         # Exploit file
         self.num_actions = len(self.actions)
         self.num_decimals = self.count_decimals()
@@ -32,12 +36,15 @@ class Optimized:
             self.actions = self.file.convert_to_list()
         # Initialization
         self.budget = budget * 10**self.num_decimals
+        self.minimum_cost = minimum_cost * 10**self.num_decimals
+        self.static_fees = static_fees * 10**self.num_decimals
+        self.pourc_fees = pourc_fees / 100
         self.transactions = []
 
     def count_decimals(self) -> int:
         """
         Count the number of decimals after point.
-        Optimizing the precision of Algorithm but multiply by ten 
+        Optimizing the precision of Algorithm but multiply by ten
         the number of calculations per decimal.
         """
         list_count_decimals = [0]
@@ -52,7 +59,7 @@ class Optimized:
         """
         Create a null matrice with dimensions : (number action; self.budget)
         """
-        list_zeros = [[0. for _ in range(self.budget)]
+        list_zeros = [[0. for _ in range(self.budget+1)]
                       for _ in range(len(self.actions))]
         array = np.array(list_zeros)
         return array
@@ -66,7 +73,7 @@ class Optimized:
                 a) Set a matrice of zeros with correct dims (dim1, dim2)
                 b) Get the actions
                 c) Define a counter "row" at 0
-            2. For: a number (A) going from 0 to dim1*dim2 
+            2. For: a number (A) going from 0 to dim1*dim2
                 a) Memorize A in another variable (B)
                 b) Do A modulo dim2 ( A will be <= dim2 ) : A = money invest
                 c) Set the cost value (C) for current 'row'
@@ -85,7 +92,6 @@ class Optimized:
                             - current benefit = benef + benefits action upside
                                                 without cost of current action.
                             ! Meaning that this current action is worth it
-                            
                     Else:
                         - Set the first row with benefits of first action
                 Else:
@@ -109,7 +115,7 @@ class Optimized:
                     Number of operation = Constant * number_of_actions
             Big-O :
                 Time = O(number_of_actions)
-            
+
         Space complexity:
             Array:
                 array = [[0. for _ in range(budget)] for _ in range(actions)]
@@ -126,13 +132,21 @@ class Optimized:
             if col >= cost:
                 benefit = ((cost * float(actions[row][2]))
                            / ((10**self.num_decimals)))
+                # To approach Sienna Logic
+        
+                #
+                # Enter condition with static and pourc fees
+                #
                 if row > 0:
                     last_value = array[row - 1][col]
                     key = int(cost)
                     if last_value > (benefit + array[row - 1][col-key]):
                         array[row][col] = last_value
                     else:
-                        array[row][col] = benefit + array[row - 1][col-key]
+                        if benefit > self.minimum_cost:
+                            array[row][col] = benefit + array[row - 1][col-key]
+                        else:
+                            array[row][col] = last_value
                 else:
                     array[row][col] = benefit
             else:
@@ -142,7 +156,7 @@ class Optimized:
                     array[row][col] = 0.
             if col == 0 and var != 0:
                 row += 1
-        # print(array)
+        print(array)
         return array
 
     def opt_transactions(self) -> list:
@@ -159,7 +173,7 @@ class Optimized:
             4. Set an empty list (A)
             5. For: index of actions for the end to the start
                 a) If current pos > pos upside
-                    - 'teleport' pos to : pos - cost value 
+                    - 'teleport' pos to : pos - cost value
                     - Append cost value to A list
                 b) (Else:)
                     - Pass and check pos upside by passing index
@@ -168,7 +182,7 @@ class Optimized:
                Time = Time_mapping + O(number_of_actions)
             => Time = O(number_of_actions) + O(number_of_actions)
             => Time = O(number_of_actions)
-            
+
         Space Complexity:
                Space = Space_mapping + O(number_of_actions)
             => Space = O(number_of_actions) + O(number_of_actions)
@@ -178,12 +192,14 @@ class Optimized:
         actions = self.actions
         col_point = trans_map.shape[1] - 1
         list_transactions = []
-        for i in range(len(actions) - 1, 0, -1):
+        for i in range(len(actions) - 1, -1, -1):
             if trans_map[i][col_point] > trans_map[i - 1][col_point]:
                 col_point -= int(actions[i][1])
                 list_transactions.append(actions[i])
+            if i == 0 and col_point > 0:
+                list_transactions.append(actions[i])
 
-        print(list_transactions)
+        # print(list_transactions)
         return list_transactions
 
     def decisions(self) -> dict:
@@ -238,7 +254,7 @@ def take_decision(**kwargs):
     return Optimized(**kwargs).decisions()
 
 
-def main():
+def main(budget, minimum_cost, static_fees, pourc_fees) -> dict:
     """
     This function is called to apply optimized strategy with inputs.
 
@@ -252,15 +268,30 @@ def main():
                             - The total cost according to the budget
                             - The return of the investment
     """
-    budget = int(input("Give budget : "))
+    # budget = int(input("Give budget : "))
     file = input("Give name of csv file containing actions : ")
+    # minimum_cost = float(input("Give minimum value of action to buy :"))
+    # static_fees = float(input("Give static fees : "))
+    # pourc_fees = float(input("Give pourcentage fees : "))
     dict_args = {
         "budget": budget,
         "actions_file_name": file,
+        "minimum_cost": minimum_cost,
+        "static_fees": static_fees,
+        "pourc_fees": pourc_fees,
     }
     best_decision = take_decision(**dict_args)
     print(best_decision)
+    return best_decision
 
 
 if __name__ == '__main__':
-    main()
+    static = 0
+    pourc = 0
+    mini = 0
+    result = main(
+                    budget=5,
+                    minimum_cost=mini,
+                    static_fees=static,
+                    pourc_fees=pourc
+                 )
