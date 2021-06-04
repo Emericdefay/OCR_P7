@@ -108,13 +108,13 @@ class Optimized:
                 Then:
                     Number of operation = Constant * number_of_actions
             Big-O :
-                O(number_of_actions)
+                Time = O(number_of_actions)
             
         Space complexity:
             Array:
                 array = [[0. for _ in range(budget)] for _ in range(actions)]
             Big-O :
-                O(number_of_actions)
+                Space = O(number_of_actions)
         """
         array = self.create_zeros_array()
         actions = self.actions
@@ -153,12 +153,26 @@ class Optimized:
         ( Section Algorithm and especially at '! Meaning' lines )
 
         Algorithm:
-            1.
+            1. Get the map for optimized way
+            2. Get actions
+            3. Set the column_point to the last value ( equivalent to [-1] )
+            4. Set an empty list (A)
+            5. For: index of actions for the end to the start
+                a) If current pos > pos upside
+                    - 'teleport' pos to : pos - cost value 
+                    - Append cost value to A list
+                b) (Else:)
+                    - Pass and check pos upside by passing index
 
         Time Complexity:
-
+               Time = Time_mapping + O(number_of_actions)
+            => Time = O(number_of_actions) + O(number_of_actions)
+            => Time = O(number_of_actions)
+            
         Space Complexity:
-
+               Space = Space_mapping + O(number_of_actions)
+            => Space = O(number_of_actions) + O(number_of_actions)
+            => Space = O(number_of_actions)
         """
         trans_map = self.mapping()
         actions = self.actions
@@ -168,7 +182,8 @@ class Optimized:
             if trans_map[i][col_point] > trans_map[i - 1][col_point]:
                 col_point -= int(actions[i][1])
                 list_transactions.append(actions[i])
-        # print(list_transactions)
+
+        print(list_transactions)
         return list_transactions
 
     def decisions(self) -> dict:
@@ -188,16 +203,15 @@ class Optimized:
         for action in actions:
             price = action[1]/(10**self.num_decimals)
             profit = action[2]/100
+
             cost += price
             benefits += price*profit
-            # self.transactions.append([action[0], price, profit])
-            self.transactions.append([action[0]])
+            self.transactions.append([action[0], price, action[2]])
+            # self.transactions.append([action[0]])
         dict_decision = {
             "actions": self.transactions,
-            # "cost": round(cost, 2),
-            # "return": round(benefits, 2),
-            "cost": cost,
-            "return": benefits,
+            "cost": round(cost, 2),
+            "return": round(benefits, 2),
         }
         return dict_decision
 

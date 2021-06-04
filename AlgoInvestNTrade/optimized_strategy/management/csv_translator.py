@@ -41,7 +41,7 @@ class CsvTranslator:
                     action[2] = float(action[2])
                     if self.num_decimals > 0:
                         action[1] = int(action[1])
-                        action[2] = int(action[2])
+                        action[2] = float(action[2])
                     if float(action[1]) > 0 and float(action[2]) > 0:
                         self.translated_list.append(action)
                 except ValueError:
